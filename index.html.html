@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ligare — Cadastro</title>
+<style>
+  /* ============================================================
+     LIGARE — Identidade visual
+     Conceito: "ligar / conectar" (Ligare = unir os dois lados).
+     Paleta (validada por pesquisa de confiança em formulários):
+       Azul-confiança como base institucional.
+       Verde-segurança SÓ nos sinais de garantia (consentimento, sucesso).
+       Neutro levemente azulado no texto (não cinza morto).
+     Assinatura: a linha que conecta — costura o topo, representa o vínculo
+       entre quem procura e quem contrata.
+     ============================================================ */
+  :root{
+    --azul:#1d4ed8;          /* confiança, base institucional */
+    --azul-escuro:#172554;   /* títulos, texto forte */
+    --azul-claro:#eff4ff;    /* fundos de campo, superfícies */
+    --verde:#16a34a;         /* SÓ segurança/sucesso */
+    --verde-claro:#ecfdf3;
+    --tinta:#1e293b;         /* texto corpo — slate, levemente azulado */
+    --tinta-suave:#64748b;   /* legendas, apoio */
+    --borda:#cbd5e1;
+    --erro:#dc2626;
+    --bg:#fafbff;            /* off-white levemente quente, não branco clínico */
+    --branco:#ffffff;
+    --raio:14px;
+    --sombra:0 1px 3px rgba(23,37,84,.08), 0 8px 24px rgba(23,37,84,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--tinta);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:0 16px 40px;
+  }
+  .wrap{width:100%;max-width:480px}
+
+  /* ---------- Cabeçalho com a assinatura (linha de conexão) ---------- */
+  header{padding:28px 0 18px;text-align:center}
+  .marca{
+    font-size:30px;font-weight:800;letter-spacing:-.5px;color:var(--azul-escuro);
+    display:inline-flex;align-items:center;gap:10px;
+  }
+  /* O ponto + linha + ponto = a "ligação" entre dois lados. É o logo. */
+  .laco{display:flex;align-items:center;gap:0;margin:14px auto 6px;width:120px}
+  .laco .no{width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+  .laco .no.a{background:var(--azul)}
+  .laco .no.b{background:var(--verde)}
+  .laco .corda{flex:1;height:3px;background:linear-gradient(90deg,var(--azul),var(--verde));border-radius:2px}
+  .tagline{color:var(--tinta-suave);font-size:15px;margin-top:2px}
+
+  /* ---------- Progresso ---------- */
+  .progresso{display:flex;gap:6px;margin:20px 0 22px}
+  .progresso .barra{flex:1;height:5px;border-radius:3px;background:var(--borda);transition:background .3s}
+  .progresso .barra.feita{background:var(--azul)}
+  .passo-info{font-size:13px;color:var(--tinta-suave);text-align:center;margin-bottom:18px}
+
+  /* ---------- Cartão / etapas ---------- */
+  .cartao{background:var(--branco);border:1px solid var(--borda);border-radius:var(--raio);box-shadow:var(--sombra);padding:24px 20px}
+  .etapa{display:none;animation:entra .25s ease}
+  .etapa.ativa{display:block}
+  @keyframes entra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .etapa h2{font-size:20px;color:var(--azul-escuro);margin-bottom:4px;letter-spacing:-.3px}
+  .etapa .sub{font-size:14px;color:var(--tinta-suave);margin-bottom:18px}
+
+  label{display:block;font-size:14px;font-weight:600;color:var(--azul-escuro);margin:14px 0 6px}
+  label .opc{font-weight:400;color:var(--tinta-suave);font-size:13px}
+  input[type=text],input[type=tel],select{
+    width:100%;padding:13px 14px;font-size:16px;/* 16px evita zoom no iOS */
+    border:1.5px solid var(--borda);border-radius:10px;background:var(--azul-claro);
+    color:var(--tinta);transition:border-color .15s,background .15s;font-family:inherit;
+  }
+  input:focus,select:focus{outline:none;border-color:var(--azul);background:var(--branco)}
+  input.invalido{border-color:var(--erro);background:#fef2f2}
+  .erro-msg{color:var(--erro);font-size:13px;margin-top:5px;display:none}
+  .erro-msg.ver{display:block}
+
+  /* ---------- Chips de seleção (área, nível, disponibilidade) ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .chip{
+    border:1.5px solid var(--borda);background:var(--branco);color:var(--tinta);
+    padding:10px 14px;border-radius:999px;font-size:14px;cursor:pointer;
+    transition:all .15s;user-select:none;
+  }
+  .chip:active{transform:scale(.97)}
+  .chip.sel{background:var(--azul);border-color:var(--azul);color:#fff;font-weight:600}
+
+  /* ---------- Bloco de experiência (agrupa o último emprego) ---------- */
+  .bloco-exp{margin-top:18px;border:1.5px solid var(--borda);border-radius:12px;padding:4px 16px 16px;background:#fbfcfe}
+  .bloco-exp-titulo{font-size:13px;font-weight:700;color:var(--azul-escuro);margin-top:14px}
+
+  /* ---------- Consentimento LGPD ---------- */
+  .lgpd{margin-top:20px;background:var(--verde-claro);border:1px solid #bbf7d0;border-radius:12px;padding:16px}
+  .lgpd .titulo{display:flex;align-items:center;gap:8px;font-weight:700;color:#15803d;font-size:14px;margin-bottom:8px}
+  .lgpd p{font-size:13px;color:#3f6212;line-height:1.5}
+  .check{display:flex;gap:10px;align-items:flex-start;margin-top:12px;cursor:pointer}
+  .check input{width:20px;height:20px;flex:0 0 auto;margin-top:1px;accent-color:var(--verde)}
+  .check span{font-size:13.5px;color:#15803d;font-weight:600}
+
+  /* ---------- Botões ---------- */
+  .acoes{display:flex;gap:10px;margin-top:24px}
+  button{font-family:inherit;font-size:16px;font-weight:700;border:none;border-radius:11px;padding:14px;cursor:pointer;transition:opacity .15s,transform .1s}
+  button:active{transform:scale(.98)}
+  .btn-primario{background:var(--azul);color:#fff;flex:1}
+  .btn-primario:disabled{opacity:.45;cursor:not-allowed}
+  .btn-volta{background:var(--azul-claro);color:var(--azul-escuro);flex:0 0 auto;padding:14px 18px}
+
+  /* ---------- Tela de sucesso ---------- */
+  .sucesso{display:none;text-align:center;padding:8px 4px}
+  .sucesso.ver{display:block;animation:entra .3s ease}
+  .selo{
+    width:96px;height:96px;border-radius:50%;margin:8px auto 18px;
+    background:var(--verde-claro);display:flex;align-items:center;justify-content:center;
+    border:3px solid var(--verde);
+  }
+  .selo svg{width:48px;height:48px;stroke:var(--verde);stroke-width:3;fill:none}
+  .sucesso h2{font-size:24px;color:var(--azul-escuro);margin-bottom:6px}
+  .sucesso .marca-selo{color:var(--azul);font-weight:800}
+  .sucesso p{color:var(--tinta-suave);font-size:15px;margin-bottom:6px}
+  .cartao-pertence{
+    margin-top:20px;border:1.5px dashed var(--azul);border-radius:12px;padding:16px;
+    background:var(--azul-claro);font-size:14px;color:var(--azul-escuro);
+  }
+
+  .rodape{text-align:center;font-size:12px;color:var(--tinta-suave);margin-top:22px;line-height:1.6}
+
+  /* Acessibilidade: respeita quem pediu menos movimento */
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="marca">Ligare</div>
+    <div class="laco"><span class="no a"></span><span class="corda"></span><span class="no b"></span></div>
+    <!-- TAGLINE: troque a linha abaixo se quiser outra -->
+    <div class="tagline">vagas perto de você</div>
+  </header>
+
+  <!-- ===================== FORMULÁRIO ===================== -->
+  <div id="form-area">
+    <div class="progresso" id="progresso">
+      <div class="barra feita"></div><div class="barra"></div><div class="barra"></div><div class="barra"></div>
+    </div>
+    <div class="passo-info" id="passo-info">Etapa 1 de 4 · leva menos de 1 minuto</div>
+
+    <div class="cartao">
+
+      <!-- ETAPA 1 — quem é -->
+      <div class="etapa ativa" data-etapa="1">
+        <h2>Vamos começar</h2>
+        <p class="sub">Só o essencial pra empresa te encontrar.</p>
+
+        <label for="nome">Seu nome completo</label>
+        <input type="text" id="nome" autocomplete="name" placeholder="Ex: Maria Silva">
+        <div class="erro-msg" id="erro-nome">Por favor, escreva seu nome.</div>
+
+        <label for="whatsapp">WhatsApp com DDD</label>
+        <input type="tel" id="whatsapp" inputmode="numeric" autocomplete="tel" placeholder="(69) 99999-9999" maxlength="16">
+        <div class="erro-msg" id="erro-whatsapp">Coloque um WhatsApp válido com DDD.</div>
+
+        <div class="acoes">
+          <button class="btn-primario" data-avanca>Continuar</button>
+        </div>
+      </div>
+
+      <!-- ETAPA 2 — onde -->
+      <div class="etapa" data-etapa="2">
+        <h2>Onde você mora</h2>
+        <p class="sub">Empresas preferem quem mora por perto.</p>
+
+        <label for="cidade">Cidade</label>
+        <select id="cidade">
+          <option value="">Selecione...</option>
+          <option>Vilhena</option>
+          <option>Cerejeiras</option>
+          <option value="outra">Outra cidade</option>
+        </select>
+        <div class="erro-msg" id="erro-cidade">Escolha sua cidade.</div>
+
+        <label for="bairro">Bairro <span class="opc">(opcional)</span></label>
+        <input type="text" id="bairro" placeholder="Ex: Centro, Jardim América...">
+
+        <div class="acoes">
+          <button class="btn-volta" data-volta>Voltar</button>
+          <button class="btn-primario" data-avanca>Continuar</button>
+        </div>
+      </div>
+
+      <!-- ETAPA 3 — o que faz -->
+      <div class="etapa" data-etapa="3">
+        <h2>Sua área</h2>
+        <p class="sub">Em que você quer trabalhar?</p>
+
+        <label>Área de interesse</label>
+        <div class="chips" id="chips-area">
+          <span class="chip" data-area>Atendimento / Vendas</span>
+          <span class="chip" data-area>Cozinha / Alimentos</span>
+          <span class="chip" data-area>Serviços gerais / Limpeza</span>
+          <span class="chip" data-area>Administrativo</span>
+          <span class="chip" data-area>Financeiro</span>
+          <span class="chip" data-area>Motorista / Entregador</span>
+          <span class="chip" data-area>Técnico / Manutenção</span>
+          <span class="chip" data-area>Construção / Obras</span>
+          <span class="chip" data-area>Saúde / Cuidados</span>
+          <span class="chip" data-area>Outros</span>
+        </div>
+        <div class="erro-msg" id="erro-area">Escolha uma área.</div>
+
+        <label>Nível</label>
+        <div class="chips" id="chips-nivel">
+          <span class="chip" data-nivel="operacional">Operacional</span>
+          <span class="chip" data-nivel="lideranca">Liderança (supervisor/gerente)</span>
+        </div>
+        <div class="erro-msg" id="erro-nivel">Escolha o nível.</div>
+
+        <div class="acoes">
+          <button class="btn-volta" data-volta>Voltar</button>
+          <button class="btn-primario" data-avanca>Continuar</button>
+        </div>
+      </div>
+
+      <!-- ETAPA 4 — detalhes + LGPD -->
+      <div class="etapa" data-etapa="4">
+        <h2>Quase lá</h2>
+        <p class="sub">Últimos detalhes pra te apresentar bem.</p>
+
+        <label>Disponibilidade de horário</label>
+        <div class="chips" id="chips-disp">
+          <span class="chip" data-disp>Manhã</span>
+          <span class="chip" data-disp>Tarde</span>
+          <span class="chip" data-disp>Noite</span>
+          <span class="chip" data-disp>Comercial</span>
+          <span class="chip" data-disp>Qualquer horário</span>
+        </div>
+        <div class="erro-msg" id="erro-disp">Escolha pelo menos uma opção.</div>
+
+        <label>Experiência na área</label>
+        <select id="experiencia">
+          <option value="">Selecione...</option>
+          <option value="nenhuma">Ainda não tenho</option>
+          <option value="ate1">Até 1 ano</option>
+          <option value="1a3">De 1 a 3 anos</option>
+          <option value="mais3">Mais de 3 anos</option>
+        </select>
+
+        <!-- Bloco de experiência: tudo sobre o último emprego, agrupado -->
+        <div class="bloco-exp">
+          <div class="bloco-exp-titulo">Sua última experiência <span class="opc">(opcional — pode pular)</span></div>
+
+          <label for="exp-onde">Onde trabalhou</label>
+          <input type="text" id="exp-onde" placeholder="Ex: Padaria Pão Quente">
+
+          <label for="exp-cargo">Qual era seu cargo</label>
+          <input type="text" id="exp-cargo" placeholder="Ex: atendente, caixa, auxiliar...">
+
+          <label for="exp-tempo">Quanto tempo ficou</label>
+          <input type="text" id="exp-tempo" placeholder="Ex: 2 anos, 8 meses...">
+        </div>
+
+        <label for="objetivo">Seu objetivo profissional <span class="opc">(opcional)</span></label>
+        <input type="text" id="objetivo" placeholder="Ex: crescer na área, primeiro emprego...">
+
+        <label for="instagram">Seu Instagram <span class="opc">(opcional)</span></label>
+        <input type="text" id="instagram" inputmode="text" placeholder="@seuperfil">
+
+        <label for="idade">Sua idade <span class="opc">(opcional)</span></label>
+        <select id="idade"><option value="">Prefiro não informar</option></select>
+
+        <!-- LGPD -->
+        <div class="lgpd">
+          <div class="titulo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Seus dados estão protegidos
+          </div>
+          <p>Usamos suas informações apenas para apresentar você a empresas da região que estão contratando. Você pode pedir a exclusão a qualquer momento.</p>
+          <label class="check">
+            <input type="checkbox" id="consentimento">
+            <span>Autorizo a Ligare a guardar meus dados e compartilhá-los com empresas contratantes.</span>
+          </label>
+        </div>
+
+        <div class="acoes">
+          <button class="btn-volta" data-volta>Voltar</button>
+          <button class="btn-primario" id="btn-enviar" disabled>Finalizar cadastro</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== SUCESSO ===================== -->
+  <div class="sucesso" id="sucesso">
+    <div class="cartao">
+      <div class="selo"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h2>Você está na <span class="marca-selo">Ligare</span>!</h2>
+      <p>Seu cadastro foi recebido com sucesso.</p>
+      <div class="cartao-pertence">
+        <strong>O que acontece agora:</strong><br>
+        As empresas da sua região consultam nosso banco quando abrem vagas. Se o seu perfil combinar, falamos com você pelo WhatsApp que você cadastrou.
+      </div>
+    </div>
+    <div class="rodape">Obrigado por confiar na Ligare.</div>
+  </div>
+
+  <div class="rodape" id="rodape-form">Ligare · conectando pessoas e trabalho na sua região</div>
+</div>
+
+<script>
+/* ====================================================================
+   CONFIGURAÇÃO — cole sua CHAVE PÚBLICA do Supabase abaixo.
+   (a publishable / anon — NUNCA a secret)
+   ==================================================================== */
+const SUPABASE_URL = "https://vtsstpnmfyuaimjzuxbr.supabase.co";
+const SUPABASE_KEY = "sb_publishable_4hw-4TQJu1orIpd_7xFOKw_0LF-I3iP";
+
+/* ==================================================================== */
+
+const estado = { etapa:1, area:null, nivel:null, disp:[], origem:null };
+const TOTAL = 4;
+
+// Captura ?origem= da URL (qual totem/loja gerou o cadastro)
+const params = new URLSearchParams(location.search);
+estado.origem = params.get("origem") || null;
+
+// Popula seletor de idade (16 a 70)
+const selIdade = document.getElementById("idade");
+for(let i=16;i<=70;i++){ const o=document.createElement("option"); o.value=i; o.textContent=i+" anos"; selIdade.appendChild(o); }
+
+const $ = s => document.querySelector(s);
+const etapas = document.querySelectorAll(".etapa");
+const barras = document.querySelectorAll("#progresso .barra");
+
+function mostraEtapa(n){
+  etapas.forEach(e => e.classList.toggle("ativa", +e.dataset.etapa===n));
+  barras.forEach((b,i) => b.classList.toggle("feita", i<n));
+  $("#passo-info").textContent = `Etapa ${n} de ${TOTAL} · leva menos de 1 minuto`;
+  estado.etapa = n;
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+// Máscara simples de telefone BR
+$("#whatsapp").addEventListener("input", e=>{
+  let v = e.target.value.replace(/\D/g,"").slice(0,11);
+  if(v.length>=2) v = "("+v.slice(0,2)+") "+v.slice(2);
+  if(v.length>=10){ const corte = v.length>=14?10:9; v = v.slice(0,corte)+"-"+v.slice(corte); }
+  e.target.value = v;
+});
+
+// Chips: área e nível = escolha única; disponibilidade = múltipla
+document.querySelectorAll("#chips-area .chip").forEach(c=>{
+  c.addEventListener("click",()=>{ document.querySelectorAll("#chips-area .chip").forEach(x=>x.classList.remove("sel")); c.classList.add("sel"); estado.area=c.textContent; $("#erro-area").classList.remove("ver"); });
+});
+document.querySelectorAll("#chips-nivel .chip").forEach(c=>{
+  c.addEventListener("click",()=>{ document.querySelectorAll("#chips-nivel .chip").forEach(x=>x.classList.remove("sel")); c.classList.add("sel"); estado.nivel=c.dataset.nivel; $("#erro-nivel").classList.remove("ver"); });
+});
+document.querySelectorAll("#chips-disp .chip").forEach(c=>{
+  c.addEventListener("click",()=>{ c.classList.toggle("sel"); estado.disp = [...document.querySelectorAll("#chips-disp .chip.sel")].map(x=>x.textContent); $("#erro-disp").classList.remove("ver"); });
+});
+
+// Habilita o botão de envio só com consentimento marcado
+$("#consentimento").addEventListener("change", e=>{ $("#btn-enviar").disabled = !e.target.checked; });
+
+// Validação por etapa
+function validaEtapa(n){
+  if(n===1){
+    let ok=true;
+    const nome=$("#nome"); const tel=$("#whatsapp");
+    if(nome.value.trim().length<2){ nome.classList.add("invalido"); $("#erro-nome").classList.add("ver"); ok=false; } else { nome.classList.remove("invalido"); $("#erro-nome").classList.remove("ver"); }
+    const dig=tel.value.replace(/\D/g,"");
+    if(dig.length<10){ tel.classList.add("invalido"); $("#erro-whatsapp").classList.add("ver"); ok=false; } else { tel.classList.remove("invalido"); $("#erro-whatsapp").classList.remove("ver"); }
+    return ok;
+  }
+  if(n===2){
+    const c=$("#cidade"); if(!c.value){ $("#erro-cidade").classList.add("ver"); return false; } $("#erro-cidade").classList.remove("ver"); return true;
+  }
+  if(n===3){
+    let ok=true;
+    if(!estado.area){ $("#erro-area").classList.add("ver"); ok=false; }
+    if(!estado.nivel){ $("#erro-nivel").classList.add("ver"); ok=false; }
+    return ok;
+  }
+  if(n===4){
+    if(estado.disp.length===0){ $("#erro-disp").classList.add("ver"); return false; }
+    return true;
+  }
+  return true;
+}
+
+document.querySelectorAll("[data-avanca]").forEach(b=>{
+  b.addEventListener("click",()=>{ if(validaEtapa(estado.etapa)) mostraEtapa(estado.etapa+1); });
+});
+document.querySelectorAll("[data-volta]").forEach(b=>{
+  b.addEventListener("click",()=>mostraEtapa(estado.etapa-1));
+});
+
+// Envio
+$("#btn-enviar").addEventListener("click", async ()=>{
+  if(!validaEtapa(4)) return;
+  if(!$("#consentimento").checked) return;
+
+  const btn = $("#btn-enviar");
+  btn.disabled=true; btn.textContent="Enviando...";
+
+  // Limpa o Instagram: aceita "@maria", "maria" ou link completo, guarda "@maria"
+  function limpaInsta(v){
+    if(!v) return null;
+    v = v.trim();
+    if(!v) return null;
+    // remove o domínio do instagram, com ou sem http/www
+    v = v.replace(/^https?:\/\//i, "");
+    v = v.replace(/^(www\.)?instagram\.com\//i, "");
+    v = v.replace(/\/.*$/, "");      // tira barra e o que vier depois
+    v = v.replace(/[@\s]/g, "");     // tira @ e espaços
+    return v ? "@"+v : null;
+  }
+
+  const registro = {
+    nome: $("#nome").value.trim(),
+    whatsapp: $("#whatsapp").value.trim(),
+    cidade: $("#cidade").value==="outra" ? "Outra" : $("#cidade").value,
+    bairro: $("#bairro").value.trim() || null,
+    area: estado.area,
+    nivel: estado.nivel,
+    disponibilidade: estado.disp.join(", "),
+    experiencia_faixa: $("#experiencia").value || null,
+    experiencia_onde: $("#exp-onde").value.trim() || null,
+    experiencia_cargo: $("#exp-cargo").value.trim() || null,
+    experiencia_tempo: $("#exp-tempo").value.trim() || null,
+    objetivo: $("#objetivo").value.trim() || null,
+    instagram: limpaInsta($("#instagram").value),
+    idade: $("#idade").value ? parseInt($("#idade").value) : null,
+    consentimento: true,
+    consentido_em: new Date().toISOString(),
+    origem: estado.origem
+  };
+
+  try{
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/candidatos`,{
+      method:"POST",
+      headers:{
+        "apikey":SUPABASE_KEY,
+        "Authorization":"Bearer "+SUPABASE_KEY,
+        "Content-Type":"application/json",
+        "Prefer":"return=minimal"
+      },
+      body: JSON.stringify(registro)
+    });
+    if(!r.ok){ const t = await r.text(); throw new Error(t || r.status); }
+    // sucesso
+    $("#form-area").style.display="none";
+    $("#rodape-form").style.display="none";
+    $("#sucesso").classList.add("ver");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }catch(err){
+    btn.disabled=false; btn.textContent="Finalizar cadastro";
+    alert("Não conseguimos enviar agora. Confira sua internet e tente de novo.\n\n("+err.message+")");
+  }
+});
+</script>
+</body>
+</html>
